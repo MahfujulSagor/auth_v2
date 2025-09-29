@@ -1,31 +1,36 @@
 package server
 
 import (
+	"log"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"time"
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
-	r := chi.NewRouter()
+// registerRoutes sets up the HTTP routes and middleware for the server.
+func registerRoutes(mux *http.ServeMux) {
+	// Health check endpoint
+	mux.Handle("/health", logger(http.HandlerFunc(healthHandler)))
 
-	// Middleware logging, recover, etc can be added here
-	r.Use(middleware.Logger)
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
-
-	r.Get("/", s.HelloWorldHandler)
-
-	return r
+	// Additional routes
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, World!"))
+// ========== Handlers ==========
+
+// healthHandler responds with a simple "OK" message to indicate the server is running.
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
+
+// ========== Middleware ==========
+
+// logger is a middleware that logs the details of each HTTP request.
+func logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		flags := " | " + r.Method + " | " + r.URL.Path
+		log.Println(flags, "|", time.Since(start))
+	})
+}
+
