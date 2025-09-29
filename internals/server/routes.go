@@ -11,6 +11,11 @@ func registerRoutes(mux *http.ServeMux) {
 	// Health check endpoint
 	mux.Handle("/health", logger(makeHandler(healthHandler)))
 
+	// Auth routes
+	mux.Handle("POST /login", logger(makeHandler(loginUserHandler)))
+	mux.Handle("POST /logout", logger(makeHandler(logoutUserHandler)))
+	mux.Handle("POST /refresh/token", logger(makeHandler(renewAccessTokenHandler)))
+
 	// Additional routes
 	mux.Handle("POST /users", logger(makeHandler(createUserHandler)))
 	mux.Handle("PUT /users", logger(makeHandler(updateUserHandler)))
@@ -28,6 +33,28 @@ func makeHandler(fn apiHandler) http.HandlerFunc {
 }
 
 // ========== Handlers ==========
+
+// Auth Handlers
+
+func loginUserHandler(w http.ResponseWriter, r *http.Request) {
+	// Placeholder for user login logic
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("User logged in"))
+}
+
+func logoutUserHandler(w http.ResponseWriter, r *http.Request) {
+	// Placeholder for user logout logic
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("User logged out"))
+}
+
+func renewAccessTokenHandler(w http.ResponseWriter, r *http.Request) {
+	// Placeholder for renewing access token logic
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Access token renewed"))
+}
+
+// User Handlers
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Placeholder for creating a user
@@ -78,4 +105,3 @@ func logger(next http.Handler) http.Handler {
 		log.Println(flags, "|", time.Since(start))
 	})
 }
-
